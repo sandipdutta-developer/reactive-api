@@ -1,0 +1,64 @@
+debug: true
+spring:
+  application:
+    name: reactive-api-sample
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  datasource:
+    url: jdbc:mariadb://localhost:3306/my_project_db
+    username: dev_user
+    password: dev_user
+    driver-class-name: org.mariadb.jdbc.Driver
+
+server:
+  port: 8081
+  # Netty specific tunings (Optional)
+  netty:
+    connection-timeout: 5s
+
+logging:
+  level:
+    com.sandip.reactive: DEBUG
+    org.springframework.web.reactive: INFO
+
+audit:
+  logging:
+    # Optional if @EnableAuditLogging is placed on the main class
+    enabled: true
+
+    # MANDATORY: Fallback remarks when no URL mapping matches. App startup fails if missing!
+    default-remarks: "Processed successfully"
+
+    # OPTIONAL: Ant-style URL pattern mapping to dynamic database remarks
+    # CRITICAL FIX: Formatted as a YAML list (-) so Spring Boot won't strip slashes or asterisks!
+    remarks-mapping:
+      - pattern: "/api/v1/reactive/process/**"
+        remark: "Sample Reactive API"
+      - pattern: "/api/v1/reactive/stream/**"
+        remark: "Sample Stream API"
+
+  # Simplified JPA / Hibernate Configuration
+  jpa:
+    open-in-view: false          # Prevents database connection starvation
+    show-sql: true               # Prints executed SQL statements to console
+    hibernate:
+      ddl-auto: none             # CRITICAL: Do not create, drop, or alter existing tables
+    properties:
+      hibernate:
+        format_sql: true         # Formats the printed SQL with clean indentation
+
+
+# Actuator & Observability
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
